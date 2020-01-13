@@ -22,6 +22,7 @@ output/writer/common/pes.c \
 output/writer/common/misc.c \
 output/linuxdvb_buffering.c \
 output/linuxdvb_mipsel.c \
+output/writer/common/writer.c \
 output/writer/mipsel/writer.c \
 output/writer/mipsel/aac.c \
 output/writer/mipsel/ac3.c \
