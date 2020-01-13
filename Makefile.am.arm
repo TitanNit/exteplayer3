@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
-AM_CFLAGS = -Wall -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE
+AM_CFLAGS = -Wall -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -DHAVE_FLV2MPEG4_CONVERTER
 
 CXXFLAGS = -Wall
 
@@ -29,10 +29,8 @@ output/writer/mipsel/pcm.c \
 output/writer/mipsel/lpcm.c \
 output/writer/mipsel/dts.c \
 output/writer/mipsel/amr.c \
-output/writer/mipsel/wma.c \
 output/writer/mipsel/h265.c \
 output/writer/mipsel/h264.c \
-output/writer/mipsel/h263.c \
 output/writer/mipsel/mpeg2.c \
 output/writer/mipsel/mpeg4.c \
 output/writer/mipsel/divx3.c \
