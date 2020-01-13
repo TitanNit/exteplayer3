@@ -24,6 +24,7 @@ output/linuxdvb_mipsel.c \
 output/writer/mipsel/writer.c \
 output/writer/mipsel/aac.c \
 output/writer/mipsel/ac3.c \
+output/writer/mipsel/bcma.c \
 output/writer/mipsel/mp3.c \
 output/writer/mipsel/pcm.c \
 output/writer/mipsel/lpcm.c \
