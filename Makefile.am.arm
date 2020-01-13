@@ -15,6 +15,7 @@ manager/manager.c \
 manager/audio.c \
 manager/video.c \
 manager/subtitle.c \
+output/graphic_subtitle.c \
 output/output_subtitle.c \
 output/output.c \
 output/writer/common/pes.c \
