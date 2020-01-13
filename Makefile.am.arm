@@ -26,6 +26,7 @@ output/writer/mipsel/aac.c \
 output/writer/mipsel/ac3.c \
 output/writer/mipsel/bcma.c \
 output/writer/mipsel/mp3.c \
+output/writer/mipsel/mjpeg.c \
 output/writer/mipsel/pcm.c \
 output/writer/mipsel/lpcm.c \
 output/writer/mipsel/dts.c \
