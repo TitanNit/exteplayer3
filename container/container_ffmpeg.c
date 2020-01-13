@@ -194,6 +194,9 @@ static int32_t Write(Write_FN WriteFun, void *context, void *privateData, int64_
 
 #include "buff_ffmpeg.c"
 #include "wrapped_ffmpeg.c"
+//obi
+#include "tools_ffmpeg.c"
+//obi (end)
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(56, 34, 100)
 #include "mpeg4p2_ffmpeg.c"
 #endif
@@ -1814,6 +1817,161 @@ int32_t container_ffmpeg_init_av_context(Context_t *context, char *filename, uin
             0 == strncmp(filename, "https://", 8))
     {
         av_dict_set(&avio_opts, "timeout", "20000000", 0); //20sec
+//obi
+		char* cookie = NULL, *tmpstr1 = NULL, *tmpstr2 = NULL, *tmpstr3 = NULL, *tmpstr4 = NULL, *headers = NULL, *useragent = NULL;
+		int count = 0, count1 = 0, count2 = 0, count3 = 0, i = 0, i1 = 0, i2 = 0, i3 = 0, usetslivemode = 0;
+
+		struct splitstr* ret1 = NULL;
+		struct splitstr* ret2 = NULL;
+
+		ffmpeg_printf(10, "check cookie\n");
+
+		if(file_exist("/mnt/network/cookies"))
+		{
+			tmpstr1 = readfiletomem("/mnt/network/cookies", 1);
+			if(tmpstr1 != NULL)
+			{
+				tmpstr1 = string_replace_all("\t", " ", tmpstr1, 1);
+				string_strip_whitechars(tmpstr1);
+				strstrip(tmpstr1);
+				ret1 = strsplit(tmpstr1, "\n", &count);
+				for(i = 0; i < count; i++)
+				{
+					count2 = 0;
+					tmpstr2 = ostrcat((&ret1[i])->part, NULL, 0, 0);
+					ret2 = strsplit(tmpstr2, " ", &count2);
+
+					if(count2 == 6)
+					{
+						cookie = ostrcat(cookie, (&ret2[4])->part, 1, 0); 
+						cookie = ostrcat(cookie, "=", 1, 0); 
+						cookie = ostrcat(cookie, (&ret2[5])->part, 1, 0);
+						cookie = ostrcat(cookie, "; domain=", 1, 0); 
+						cookie = ostrcat(cookie, (&ret2[0])->part, 1, 0); 
+						cookie = ostrcat(cookie, "; path=", 1, 0); 
+						cookie = ostrcat(cookie, (&ret2[2])->part, 1, 0);  
+						cookie = ostrcat(cookie, "\n", 1, 0);
+ 					}
+
+					if(count2 == 7)
+					{
+						cookie = ostrcat(cookie, (&ret2[5])->part, 1, 0); 
+						cookie = ostrcat(cookie, "=", 1, 0); 
+						cookie = ostrcat(cookie, (&ret2[6])->part, 1, 0);
+						cookie = ostrcat(cookie, "; domain=", 1, 0); 
+						cookie = ostrcat(cookie, (&ret2[0])->part, 1, 0); 
+						cookie = ostrcat(cookie, "; path=", 1, 0); 
+						cookie = ostrcat(cookie, (&ret2[2])->part, 1, 0);  
+						cookie = ostrcat(cookie, "\n", 1, 0); 
+					}
+					
+					free(ret2), ret2 = NULL;
+					free(tmpstr2), tmpstr2 = NULL;
+				}
+				free(ret1), ret1 = NULL;
+				free(tmpstr1), tmpstr1 = NULL;
+			}
+		}
+		if(cookie != NULL)
+		{
+			ffmpeg_printf(10, "set cookies: %s\n", cookie);
+	      	av_dict_set(&avio_opts, "cookies", cookie, 0);
+		}
+		else
+			ffmpeg_printf(10, "skip set cookies : %s\n", cookie);
+
+		ffmpeg_printf(10, "check user-agent and header\n");
+
+	        if (ostrstr(filename, "&tslivemode=1") != NULL)
+			usetslivemode = 1;
+
+		if(ostrstr(filename, "|") != NULL)
+		{
+			tmpstr1 = ostrcat(filename, NULL, 0, 0);
+			ret1 = strsplit(tmpstr1, "|", &count1);
+		
+			if(ret1 != NULL)
+			{
+				for(i1 = 0; i1 < count1; i1++)
+				{
+					if(i1 == 0) continue;
+
+					count2 = 0;
+					i2 = 0;
+
+					tmpstr2 = ostrcat(ret1[i1].part, NULL, 0, 0);
+					ret2 = strsplit(tmpstr2, "&", &count2);
+
+					if(ret2 != NULL)
+					{
+						for(i2 = 0; i2 < count2; i2++)
+						{
+							count3 = 0;
+							i3 = 0;	
+							struct splitstr* ret3 = NULL;
+							tmpstr3 = ostrcat(ret2[i2].part, NULL, 0, 0);
+							ret3 = strsplit(tmpstr3, "=", &count3);
+					
+							if(ret3 != NULL && count3 > 0)
+							{
+								int max = count3 - 1;
+								for(i3 = 0; i3 < max; i3++)
+								{
+									if(ostrcmp("User-Agent", ret3[i3].part) == 0)
+									{
+										av_dict_set(&avio_opts, "user-agent", ret3[i3 + 1].part, 0);
+									   	ffmpeg_printf(10, "set user-agent: %s\n", ret3[i3 + 1].part);
+									   	useragent = ostrcat(useragent, ret3[i3 + 1].part, 1, 0);
+					   				}
+					   				else
+									{
+									    headers = ostrcat(headers, ret3[i3].part, 1, 0);
+									    headers = ostrcat(headers, ": ", 1, 0);
+									    headers = ostrcat(headers, ret3[i3 + 1].part, 1, 0);
+									    headers = ostrcat(headers, "\r\n", 1, 0);
+					   				}
+								}
+							}
+							free(ret3), ret3 = NULL;
+							free(tmpstr3), tmpstr3 = NULL;
+						}
+					}
+					free(ret2), ret2 = NULL;
+					free(tmpstr2), tmpstr2 = NULL;
+				}
+
+			    if(headers != NULL)
+				{
+					headers = string_replace_all("%3D", "=", headers, 1);
+					headers = string_replace_all("%26", "&", headers, 1);
+			        av_dict_set(&avio_opts, "headers", headers, 0);
+				   	ffmpeg_printf(10, "set headers: %s\n", headers);
+				}
+				else
+					ffmpeg_printf(10, "skip set headers: %s\n", headers);
+
+			    if(useragent == NULL)
+					ffmpeg_printf(10, "skip set user-agent: %s\n", headers);
+			}
+
+			free(useragent), useragent = NULL;
+			free(headers), headers = NULL;
+			free(ret1), ret1 = NULL;	
+			free(tmpstr1), tmpstr1 = NULL;
+			stringreplacechar(filename, '|', '\0');		
+		   	ffmpeg_printf(10, "changed filename: %s\n", filename);
+
+		}
+	   	ffmpeg_printf(10, "check tslivemode\n");
+
+//        	if (ostrstr(filename, ".m3u8") != NULL)
+	        if (usetslivemode == 1)
+	        {
+		   	ffmpeg_printf(10, "set tslivemode\n");
+			context->playback->isTSLiveMode = 1;
+		}
+//obi (end)
+
         av_dict_set(&avio_opts, "reconnect", "1", 0);
         if (context->playback->isTSLiveMode) // special mode for live TS stream with skip packet 
         {
@@ -1848,6 +2006,11 @@ int32_t container_ffmpeg_init_av_context(Context_t *context, char *filename, uin
             {
                 av_dict_free(&avio_opts);
             }
+
+            //obi
+            ffmpeg_buf_free();
+            //obi (end)
+
             releaseMutex(__FILE__, __FUNCTION__,__LINE__);
             return cERR_CONTAINER_FFMPEG_OPEN;
         }
@@ -1916,6 +2079,10 @@ int32_t container_ffmpeg_init(Context_t *context, PlayFiles_t *playFilesNames)
 
     ffmpeg_printf(10, ">\n");
 
+    //obi
+    ffmpeg_buf_free();
+    //obi (end)
+
     if (playFilesNames == NULL) 
     {
         ffmpeg_err("playFilesNames NULL\n");
@@ -1951,11 +2118,15 @@ int32_t container_ffmpeg_init(Context_t *context, PlayFiles_t *playFilesNames)
     wrapped_register_all();
     avformat_network_init();
 
-#if FFMPEG_DEBUG_LEVEL >= 10
-    av_log_set_level( AV_LOG_DEBUG );
-#else
-    av_log_set_callback( ffmpeg_silen_callback );
-#endif
+//obi
+    char* tmpstr = NULL;
+    tmpstr = readfiletomem("/mnt/config/titan.cfg", 1);
+    if(ostrstr(tmpstr, "debuglevel=99") != NULL)
+        av_log_set_level( AV_LOG_DEBUG );
+    else
+        av_log_set_callback(ffmpeg_silen_callback);
+    free(tmpstr), tmpstr = NULL;
+//obi (end) 
 
     context->playback->abortRequested = 0;
     int32_t res = container_ffmpeg_init_av_context(context, playFilesNames->szFirstFile, playFilesNames->iFirstFileSize, \
@@ -2684,7 +2855,23 @@ static int32_t container_ffmpeg_stop(Context_t *context)
         ffmpeg_err("Container not running\n");
         return cERR_CONTAINER_FFMPEG_ERR;
     }
-    
+
+    //obi
+    wait_time = 100;
+    if(hasfillerThreadStarted[hasfillerThreadStartedID] == 1)
+        hasfillerThreadStarted[hasfillerThreadStartedID] = 2; // should end
+    while ( (hasfillerThreadStarted[hasfillerThreadStartedID] != 0) && (--wait_time) > 0 ) {
+        ffmpeg_printf(10, "Waiting for ffmpeg filler thread to terminate itself, will try another %d times, ID=%d\n", wait_time, hasfillerThreadStartedID);
+        usleep(100000);
+    }
+
+    if (wait_time == 0) {
+        ffmpeg_err( "Timeout waiting for filler thread!\n");
+
+        ret = cERR_CONTAINER_FFMPEG_ERR;
+    }
+    //obi (end)
+
     if (context->playback)
     {
         context->playback->isPlaying = 0;
@@ -2731,6 +2918,9 @@ static int32_t container_ffmpeg_stop(Context_t *context)
                 use_custom_io[i] = 0;
             }
             avformat_close_input(&avContextTab[i]);
+            //obi
+            ffmpeg_buf_free();
+            //obi (end)
             avContextTab[i] = NULL;
         }
         else
@@ -3081,6 +3271,13 @@ static int32_t Command(void  *_context, ContainerCmd_t command, void *argument)
         *((int64_t*)argument) = latestPts;
         break;
     }
+    //obi
+    case CONTAINER_SET_BUFFER_SEEK_TIME:
+    {
+    	ret = container_set_ffmpeg_buf_seek_time((int*) argument);
+	    break;
+    }
+    //obi (end)
     case CONTAINER_SET_BUFFER_SIZE:
     {
         ret = container_set_ffmpeg_buf_size((int32_t *) argument);
@@ -3092,7 +3289,21 @@ static int32_t Command(void  *_context, ContainerCmd_t command, void *argument)
         ret = container_get_ffmpeg_buf_size(&size);
         *((int32_t*)argument) = size;
         break;
-    }   
+    }
+    //obi
+    case CONTAINER_GET_BUFFER_STATUS:
+    {
+	    int32_t size = 0;
+	    ret = container_get_fillbufstatus(&size);
+	    *((int32_t*)argument) = size;
+	    break;
+    }
+    case CONTAINER_STOP_BUFFER:
+    {
+	    ret = container_stop_buffer();
+	    break;
+    }
+    //obi (end)
     default:
         ffmpeg_err("ContainerCmd %d not supported!\n", command);
         ret = cERR_CONTAINER_FFMPEG_ERR;
