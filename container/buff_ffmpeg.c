@@ -124,10 +124,12 @@ static void update_finish_timeout()
 static int32_t ffmpeg_read_wrapper_base(void *opaque, uint8_t *buf, int32_t buf_size, uint8_t type)
 {
     int32_t len = 0;
+
     if(0 == PlaybackDieNow(0))
     {
         len = ffmpeg_real_read_org(opaque, buf, buf_size);
         while(len < buf_size && g_context && 0 == PlaybackDieNow(0))
+        while(len < buf_size && g_context)
         {
             if(type && len > 0)
             {
@@ -269,7 +271,9 @@ static void ffmpeg_filler(Context_t *context, int32_t id, int32_t* inpause, int3
     {
          if( 0 == PlaybackDieNow(0))
          {
-            break;
+//obi
+//            break;
+//obi (end)
          }
          
          if(flag == 0 && ffmpeg_buf_stop == 1)
@@ -522,8 +526,10 @@ static int32_t ffmpeg_read(void *opaque, uint8_t *buf, int32_t buf_size)
     int32_t sumlen = 0;
     int32_t len = 0;
     int32_t count = 2000;
-
-    while(sumlen < buf_size && (--count) > 0 && 0 == PlaybackDieNow(0))
+//obi
+//    while(sumlen < buf_size && (--count) > 0 && 0 == PlaybackDieNow(0))
+    while(sumlen < buf_size && (--count) > 0)
+//obi (end)
     {
         len = ffmpeg_read_real(opaque, buf, buf_size - sumlen);
         sumlen += len;

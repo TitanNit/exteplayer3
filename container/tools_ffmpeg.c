@@ -50,7 +50,7 @@ char* oitoa(int value)
 	buf = malloc(MINMALLOC);
 	if(buf == NULL)
 	{
-		err("no mem");
+//		err("no mem");
 		return NULL;
 	}
 
@@ -67,7 +67,7 @@ char* olutoa(unsigned long value)
 	buf = malloc(MINMALLOC);
 	if(buf == NULL)
 	{
-		err("no mem");
+//		err("no mem");
 		return NULL;
 	}
 
@@ -84,7 +84,7 @@ char* ollutoa(uint64_t value)
 	buf = malloc(MINMALLOC);
 	if(buf == NULL)
 	{
-		err("no mem");
+//		err("no mem");
 		return NULL;
 	}
 
@@ -101,7 +101,7 @@ char* oitoa64(off64_t value)
 	buf = malloc(MINMALLOC);
 	if(buf == NULL)
 	{
-		err("no mem");
+//		err("no mem");
 		return NULL;
 	}
 
@@ -395,3 +395,41 @@ int ostrcmp(char* value1, char* value2)
 
 	return ret;
 }
+
+static int32_t g_windows_width = 1280;
+static int32_t g_windows_height = 720;
+static char *g_graphic_sub_path;
+
+const char* GetGraphicSubPath()
+{
+    return g_graphic_sub_path;
+}
+
+int32_t GetGraphicWindowWidth()
+{
+    return g_windows_width;
+}
+
+int32_t GetGraphicWindowHeight()
+{
+    return g_windows_height;
+}
+
+void E2iSendMsg(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    va_end(args);
+}
+
+void E2iStartMsg(void)
+{
+    flockfile(stderr);
+}
+
+void E2iEndMsg(void)
+{
+    funlockfile(stderr);
+}
+

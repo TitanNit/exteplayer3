@@ -1405,7 +1405,10 @@ static int32_t terminating = 0;
 static int32_t interrupt_cb(void *ctx)
 {
     PlaybackHandler_t *p = (PlaybackHandler_t *)ctx;
-    return p->abortRequested || PlaybackDieNow(0);
+//obi
+//    return p->abortRequested || PlaybackDieNow(0);
+    return p->abortRequested;
+//obi (end)
 }
 
 #ifdef USE_CUSTOM_IO
