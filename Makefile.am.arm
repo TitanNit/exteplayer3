@@ -52,23 +52,10 @@ external/flv2mpeg4/src/dcprediction.c \
 external/flv2mpeg4/src/flv2mpeg4.c \
 external/plugins/src/png.c
 
-#libeplayer3_la_LIBADD = -lpthread -lavformat -lavcodec -lavutil -lswresample -lz -lass -lm -lpng
 libeplayer3_la_LIBADD = -lswscale -ldl -lpthread -lavformat -lavcodec -lavutil -lswresample
 
 
 bin_PROGRAMS = eplayer3
 eplayer3_SOURCES = main/exteplayer.c
-#eplayer3_LDADD = -leplayer3 -lpthread
-eplayer3_LDADD = -leplayer3 -lpthread -lass -lm -lpng
+eplayer3_LDADD = -leplayer3 -lpthread
 eplayer3_DEPENDENCIES = libeplayer3.la
-
-
-#bin_PROGRAMS = exteplayer
-#exteplayer_SOURCES = main/exteplayer.c
-#exteplayer_LDADD = -leplayer3 -lpthread -lass -lm -lpng
-#exteplayer_DEPENDENCIES = libeplayer3.la
-
-#meta_SOURCES = tools/meta.c
-#meta_LDADD = -leplayer3 -lpthread -lavformat -lavcodec -lavutil -lass -lm -lpng
-#meta_DEPENDENCIES = libeplayer3.la
-
