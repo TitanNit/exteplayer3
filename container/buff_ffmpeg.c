@@ -124,11 +124,12 @@ static void update_finish_timeout()
 static int32_t ffmpeg_read_wrapper_base(void *opaque, uint8_t *buf, int32_t buf_size, uint8_t type)
 {
     int32_t len = 0;
-
     if(0 == PlaybackDieNow(0))
     {
         len = ffmpeg_real_read_org(opaque, buf, buf_size);
-        while(len < buf_size && g_context && 0 == PlaybackDieNow(0))
+//obi
+//        while(len < buf_size && g_context && 0 == PlaybackDieNow(0))
+//obi (end)
         while(len < buf_size && g_context)
         {
             if(type && len > 0)
