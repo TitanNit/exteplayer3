@@ -68,7 +68,7 @@
  * due to this we set own which use fopen/fread from
  * std library.
  */
-#define USE_CUSTOM_IO
+//#define USE_CUSTOM_IO
 
 /* Error Constants */
 #define cERR_CONTAINER_FFMPEG_NO_ERROR        0
@@ -149,7 +149,7 @@ static void getMutex(const char *filename __attribute__((unused)), const char *f
     ffmpeg_printf(100, "::%d received mutex\n", line);
 }
 
-static void releaseMutex(const char *filename __attribute__((unused)), const const char *function __attribute__((unused)), int32_t line) 
+static void releaseMutex(const char *filename __attribute__((unused)), const char *function __attribute__((unused)), int32_t line) 
 {
     pthread_mutex_unlock(&mutex);
 
